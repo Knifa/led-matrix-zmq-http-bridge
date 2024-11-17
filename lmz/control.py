@@ -1,9 +1,12 @@
 import asyncio
+import logging
 import struct
 from enum import IntEnum
 
 import zmq
 import zmq.asyncio
+
+logger = logging.getLogger(__name__)
 
 
 class MessageType(IntEnum):
@@ -25,12 +28,15 @@ def _pack_message(message_type: MessageType, pack_format: str, *args) -> bytes:
 
 class LmzControl:
     def __init__(self, addr: str) -> None:
+        self._addr = addr
         self._lock = asyncio.Lock()
 
         self._context = zmq.asyncio.Context()
-        self._socket = self._context.socket(zmq.REQ)
-        self._socket.rcvtimeo = 1000
-        self._socket.connect(addr)
+        self._context.sndtimeo = 1000
+        self._context.rcvtimeo = 1000
+        self._context.linger = 0
+
+        self._socket: zmq.Socket = self._init_socket(self._context, addr)
 
     async def set_brightness(self, brightness: int) -> None:
         await self._send_message(get_brightness_message(brightness))
@@ -40,5 +46,23 @@ class LmzControl:
 
     async def _send_message(self, message: bytes) -> None:
         async with self._lock:
-            await self._socket.send(message)
-            await self._socket.recv()
+            assert self._socket
+
+            try:
+                await self._socket.send(message)
+                await self._socket.recv()
+            except zmq.error.Again as e:
+                logger.error("Unable to send control message: %s", e)
+                self._reset_socket()
+
+    def _init_socket(self, context: zmq.Context, addr: str) -> zmq.Socket:
+        socket = context.socket(zmq.REQ)
+        socket.connect(addr)
+        return socket
+
+    def _reset_socket(self) -> None:
+        if self._socket:
+            self._socket.close()
+            del self._socket
+
+        self._socket = self._init_socket(self._context, self._addr)
