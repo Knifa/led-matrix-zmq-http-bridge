@@ -1,6 +1,18 @@
 import argparse
 
 import uvicorn
+import uvicorn.config
+
+LOGGING_CONFIG = dict(uvicorn.config.LOGGING_CONFIG)
+LOGGING_CONFIG["formatters"]["default"] = {
+    **LOGGING_CONFIG["formatters"]["default"],
+    "fmt": "%(levelprefix)s %(name)s - %(message)s",
+}
+LOGGING_CONFIG["loggers"]["lmz"] = {
+    "handlers": ["default"],
+    "level": "DEBUG",
+    "propagate": False,
+}
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -9,7 +9,7 @@ from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 
 SERVICE_TYPE = "_lmz-control-api._tcp.local."
 
-logger = logging.getLogger("uvicorn.error")
+logger = logging.getLogger(__name__)
 
 
 async def get_default_route_srcip() -> str:
