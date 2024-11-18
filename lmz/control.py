@@ -27,42 +27,70 @@ def _pack_message(message_type: MessageType, pack_format: str, *args) -> bytes:
 
 
 class LmzControl:
+    QUEUE_SIZE = 10
+
     def __init__(self, addr: str) -> None:
         self._addr = addr
-        self._lock = asyncio.Lock()
 
-        self._context = zmq.asyncio.Context()
-        self._context.sndtimeo = 1000
-        self._context.rcvtimeo = 1000
-        self._context.linger = 0
+        self._zmq_context = zmq.asyncio.Context()
+        self._zmq_context.sndtimeo = 1000
+        self._zmq_context.rcvtimeo = 1000
+        self._zmq_context.linger = 0
+        self._zmq_socket: zmq.Socket | None = None
 
-        self._socket: zmq.Socket = self._init_socket(self._context, addr)
+        self._queue: asyncio.Queue[bytes] = asyncio.Queue()
+        self._task_handle: asyncio.Task | None = None
 
-    async def set_brightness(self, brightness: int) -> None:
-        await self._send_message(get_brightness_message(brightness))
+    async def __aenter__(self) -> "LmzControl":
+        self._reset_socket()
+        self._task_handle = asyncio.create_task(self._task())
+        return self
 
-    async def set_temperature(self, temperature: int) -> None:
-        await self._send_message(get_temperature_message(temperature))
+    async def __aexit__(self, *args) -> None:
+        if self._task_handle:
+            self._task_handle.cancel()
+            await self._task_handle
+            self._task_handle = None
 
-    async def _send_message(self, message: bytes) -> None:
-        async with self._lock:
-            assert self._socket
+        if self._zmq_socket:
+            self._zmq_socket.close()
+            self._zmq_socket = None
 
-            try:
-                await self._socket.send(message)
-                await self._socket.recv()
-            except zmq.error.Again as e:
-                logger.error("Unable to send control message: %s", e)
-                self._reset_socket()
+    def set_brightness(self, brightness: int) -> None:
+        self._enqueue_message(get_brightness_message(brightness))
 
-    def _init_socket(self, context: zmq.Context, addr: str) -> zmq.Socket:
-        socket = context.socket(zmq.REQ)
-        socket.connect(addr)
-        return socket
+    def set_temperature(self, temperature: int) -> None:
+        self._enqueue_message(get_temperature_message(temperature))
 
     def _reset_socket(self) -> None:
-        if self._socket:
-            self._socket.close()
-            del self._socket
+        if self._zmq_socket:
+            self._zmq_socket.close()
 
-        self._socket = self._init_socket(self._context, self._addr)
+        self._zmq_socket = self._zmq_context.socket(zmq.REQ)
+        self._zmq_socket.connect(self._addr)
+
+    def _enqueue_message(self, message: bytes) -> None:
+        if self._queue.qsize() >= self.QUEUE_SIZE:
+            logger.warning("Control message queue full, dropping oldest message.")
+            self._queue.get_nowait()
+
+        self._queue.put_nowait(message)
+
+    async def _send_message(self, message: bytes) -> None:
+        assert self._zmq_socket
+
+        try:
+            await self._zmq_socket.send(message)
+            await self._zmq_socket.recv()
+        except zmq.error.Again as e:
+            logger.error("Unable to send control message: %s", e)
+            self._reset_socket()
+
+    async def _task(self) -> None:
+        try:
+            while True:
+                message = await self._queue.get()
+                logger.debug("Sending control message: %r", message)
+                await self._send_message(message)
+        except asyncio.CancelledError:
+            logger.info("Control task cancelled.")

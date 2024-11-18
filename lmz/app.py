@@ -8,6 +8,8 @@ from .control import LmzControl
 from .settings import settings
 from .zeroconf import lmz_zeroconf
 
+lmz_control = LmzControl(settings.control_endpoint)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -15,17 +17,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         yield
         return
 
-    async with lmz_zeroconf(
-        name=settings.zeroconf_name,
-        address=settings.zeroconf_ip,
-        port=settings.api_port,
+    async with (
+        lmz_zeroconf(
+            name=settings.zeroconf_name,
+            address=settings.zeroconf_ip,
+            port=settings.api_port,
+        ),
+        lmz_control,
     ):
         yield
 
 
 app = FastAPI(lifespan=lifespan)
-control = LmzControl(settings.control_endpoint)
-
 OK_STATUS = {"status": "ok"}
 
 
@@ -39,11 +42,11 @@ class BrightnessRequest(BaseModel):
 
 @app.post("/temperature")
 async def set_temperature(request: TemperatureRequest):
-    await control.set_temperature(request.temperature)
+    lmz_control.set_temperature(request.temperature)
     return OK_STATUS
 
 
 @app.post("/brightness")
 async def set_brightness(request: BrightnessRequest):
-    await control.set_brightness(request.brightness)
+    lmz_control.set_brightness(request.brightness)
     return OK_STATUS
