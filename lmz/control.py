@@ -209,5 +209,8 @@ class LmzControl:
         try:
             rep_bytes = await self._zmq_socket.recv()
             return rep_type.from_bytes(rep_bytes)
+        except zmq.error.Again as e:
+            self._reset_socket()
+            raise MessageError("Timeout") from e
         except ValueError as e:
             raise MessageError("Invalid reply") from e
