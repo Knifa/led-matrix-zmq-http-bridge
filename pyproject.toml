@@ -9,3 +9,10 @@ dependencies = [
     "pyzmq>=26.2.0",
     "zeroconf>=0.136.0",
 ]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13.0",
+    "pytest>=8.3.3",
+    "ruff>=0.8.0",
+]

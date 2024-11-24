@@ -9,6 +9,10 @@ wheels/
 # Virtual environments
 .venv
 
-# Misc.
+# Tools
+.mypy_cache/
+.pytest_cache/
 .ruff_cache/
+
+# Misc.
 .vscode/

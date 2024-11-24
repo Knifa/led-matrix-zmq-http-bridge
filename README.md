@@ -13,6 +13,16 @@ uv sync
 uv run python -m lmz
 ```
 
+### GET `/brightness`
+
+Get the current brightness of the display (0-100%).
+
+```bash
+curl http://localhost:4200/brightness
+
+# {"brightness": 50}
+```
+
 ### POST `/brightness`
 
 Set the brightness of the display (0-100%)
@@ -23,6 +33,16 @@ curl \
     -H "Content-Type: application/json" \
     -d '{"brightness": 50}' \
     http://localhost:4200/brightness
+
+# {"statuc": "ok"}
+```
+
+
+### GET `/temperature`
+```bash
+curl http://localhost:4200/temperature
+
+# {"temperature": 2500}
 ```
 
 ###  POST `/temperature`
@@ -35,6 +55,8 @@ curl \
     -H "Content-Type: application/json" \
     -d '{"temperature": 2500}' \
     http://localhost:4200/temperature
+
+# {"statuc": "ok"}
 ```
 
 ## Zeroconf

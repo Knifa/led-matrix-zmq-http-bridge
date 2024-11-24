@@ -29,24 +29,35 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(lifespan=lifespan)
+
 OK_STATUS = {"status": "ok"}
 
 
-class TemperatureRequest(BaseModel):
+class Brightness(BaseModel):
+    brightness: int = Field(description="Brightness", ge=0, le=255)
+
+
+class Temperature(BaseModel):
     temperature: int = Field(description="Color temperature (Kelvin)", ge=2000, le=6500)
 
 
-class BrightnessRequest(BaseModel):
-    brightness: int = Field(description="Brightness level (%)", ge=0, le=100)
-
-
-@app.post("/temperature")
-async def set_temperature(request: TemperatureRequest):
-    lmz_control.set_temperature(request.temperature)
-    return OK_STATUS
+@app.get("/brightness")
+async def get_brightness() -> Brightness:
+    return Brightness(brightness=await lmz_control.get_brightness())
 
 
 @app.post("/brightness")
-async def set_brightness(request: BrightnessRequest):
-    lmz_control.set_brightness(request.brightness)
+async def set_brightness(request: Brightness):
+    await lmz_control.set_brightness(request.brightness)
+    return OK_STATUS
+
+
+@app.get("/temperature")
+async def get_temperature() -> Temperature:
+    return Temperature(temperature=await lmz_control.get_temperature())
+
+
+@app.post("/temperature")
+async def set_temperature(request: Temperature):
+    await lmz_control.set_temperature(request.temperature)
     return OK_STATUS
