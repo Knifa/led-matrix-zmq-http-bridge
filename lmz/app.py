@@ -33,6 +33,11 @@ app = FastAPI(lifespan=lifespan)
 OK_STATUS = {"status": "ok"}
 
 
+@app.get("/healthcheck")
+async def healthcheck():
+    return OK_STATUS
+
+
 class Brightness(BaseModel):
     brightness: int = Field(description="Brightness", ge=0, le=255)
 
