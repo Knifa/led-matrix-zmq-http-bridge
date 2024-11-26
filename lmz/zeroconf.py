@@ -46,14 +46,16 @@ async def lmz_zeroconf(
 ) -> AsyncGenerator[None, None]:
     zeroconf = AsyncZeroconf()
 
-    name = name or socket.gethostname()
+    hostname = socket.gethostname()
+    name = name or hostname
     address = address or await get_default_route_srcip()
 
     service_info = AsyncServiceInfo(
-        type_=SERVICE_TYPE,
-        name=f"{name}.{SERVICE_TYPE}",
         addresses=[socket.inet_aton(address)],
+        name=f"{name}.{SERVICE_TYPE}",
         port=port,
+        server=f"{hostname}.local",
+        type_=SERVICE_TYPE,
     )
 
     logger.info(
