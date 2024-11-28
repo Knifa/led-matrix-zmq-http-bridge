@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Type
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from .control import LmzControl
+from .control import LmzControl, MessageError
 from .settings import settings
 from .zeroconf import lmz_zeroconf
 
@@ -30,12 +31,22 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 app = FastAPI(lifespan=lifespan)
 
-OK_STATUS = {"status": "ok"}
+OK_RESPONSE = JSONResponse(content={"status": "ok"})
+
+
+@app.exception_handler(MessageError)
+async def app_message_error_handler(
+    request: Request, exc: MessageError
+) -> JSONResponse:
+    return JSONResponse(
+        content={"status": "error", "error": str(exc)},
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+    )
 
 
 @app.get("/healthcheck")
-async def healthcheck():
-    return OK_STATUS
+async def healthcheck() -> JSONResponse:
+    return OK_RESPONSE
 
 
 class Brightness(BaseModel):
@@ -52,9 +63,9 @@ async def get_brightness() -> Brightness:
 
 
 @app.post("/brightness")
-async def set_brightness(request: Brightness):
+async def set_brightness(request: Brightness) -> JSONResponse:
     await lmz_control.set_brightness(request.brightness)
-    return OK_STATUS
+    return OK_RESPONSE
 
 
 @app.get("/temperature")
@@ -63,6 +74,6 @@ async def get_temperature() -> Temperature:
 
 
 @app.post("/temperature")
-async def set_temperature(request: Temperature):
+async def set_temperature(request: Temperature) -> JSONResponse:
     await lmz_control.set_temperature(request.temperature)
-    return OK_STATUS
+    return OK_RESPONSE

@@ -32,10 +32,11 @@ async def get_default_route_srcip() -> str:
 
     try:
         default_route = next(route for route in routes if route["dst"] == "default")
+        return default_route["prefsrc"]  # type: ignore
     except StopIteration:
         raise RuntimeError("No default route found")
-
-    return default_route["prefsrc"]
+    except KeyError:
+        raise RuntimeError("Default route has no preferred source")
 
 
 @asynccontextmanager
@@ -48,7 +49,17 @@ async def lmz_zeroconf(
 
     hostname = socket.gethostname()
     name = name or hostname
-    address = address or await get_default_route_srcip()
+
+    try:
+        address = address or await get_default_route_srcip()
+    except RuntimeError as e:
+        logger.warning(
+            "Failed to get IP address: %s."
+            " Zeroconf will be disabled. Maybe try set LMZ_ZEROCONF_IP?",
+            e,
+        )
+        yield
+        return
 
     service_info = AsyncServiceInfo(
         addresses=[socket.inet_aton(address)],

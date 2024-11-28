@@ -34,7 +34,7 @@ class Args(abc.ABC):
     def pack_format() -> str:
         raise NotImplementedError
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[Any]:
         for field in dataclasses.fields(self):
             yield getattr(self, field.name)
 
@@ -135,7 +135,20 @@ class SetTemperatureRequest(Message[TemperatureArgs]):
     args_t = TemperatureArgs
 
 
-MessageT = TypeVar("MessageT", bound=Message)
+RequestMessageT = TypeVar(
+    "RequestMessageT",
+    GetBrightnessRequest,
+    GetTemperatureRequest,
+    SetBrightnessRequest,
+    SetTemperatureRequest,
+)
+
+ReplyMessageT = TypeVar(
+    "ReplyMessageT",
+    GetBrightnessReply,
+    GetTemperatureReply,
+    NullReply,
+)
 
 
 class LmzControl:
@@ -152,7 +165,7 @@ class LmzControl:
         self._reset_socket()
         return self
 
-    async def __aexit__(self, *args) -> None:
+    async def __aexit__(self, *args: Any) -> None:
         if self._zmq_socket:
             self._zmq_socket.close()
             self._zmq_socket = None
@@ -194,9 +207,9 @@ class LmzControl:
 
     async def _send_recv(
         self,
-        req_msg: MessageT,
-        rep_type: Type[MessageT],
-    ) -> MessageT:
+        req_msg: RequestMessageT,
+        rep_type: Type[ReplyMessageT],
+    ) -> ReplyMessageT:
         assert self._zmq_socket
         req_bytes = req_msg.to_bytes()
 
