@@ -50,7 +50,7 @@ curl \
     -d '{"brightness": 50}' \
     http://localhost:4200/brightness
 
-# {"statuc": "ok"}
+# {"status": "ok"}
 ```
 
 
@@ -72,7 +72,7 @@ curl \
     -d '{"temperature": 2500}' \
     http://localhost:4200/temperature
 
-# {"statuc": "ok"}
+# {"status": "ok"}
 ```
 
 ## Zeroconf
