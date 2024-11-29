@@ -1,36 +1,41 @@
-FROM ubuntu:latest as build
+FROM alpine:latest as build
 
-RUN apt-get update && \
-  apt-get install -y \
-    pipx \
-    python3 \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+ARG TARGETPLATFORM
 
-ENV PATH="/root/.local/bin:$PATH"
+RUN apk add --no-cache \
+  py3-pip \
+  python3
 
-RUN pipx install uv
+RUN mkdir -p /build/led-matrix-zmq-control-api
+WORKDIR /build/led-matrix-zmq-control-api
 
+RUN python -m venv .venv && \
+  source .venv/bin/activate && \
+  pip install --upgrade uv
 
-RUN mkdir -p /build/
-WORKDIR /build/
+ENV PATH="/build/led-matrix-zmq-control-api/.venv/bin:$PATH"
+
+# linux/arm/v7 requires additional build dependencies.
+RUN \
+  if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+    apk add --no-cache \
+      build-base \
+      cargo \
+      python3-dev; \
+  fi
 
 COPY pyproject.toml uv.lock ./
 RUN uv sync
 
+FROM alpine:latest as run
 
-FROM ubuntu:latest as run
+RUN apk add --no-cache \
+  python3
 
-RUN apt-get update && \
-  apt-get install -y \
-    python3 \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p /opt/led-matrix-zmq-control-api
+COPY --from=build /build/led-matrix-zmq-control-api/.venv /opt/led-matrix-zmq-control-api/.venv
 
-RUN mkdir -p /opt/
-COPY --from=build /build/.venv /opt/.venv
-
-ENV PATH="/opt/.venv/bin:$PATH"
+ENV PATH="/opt/led-matrix-zmq-control-api/.venv/bin:$PATH"
 
 COPY lmz ./lmz
 
