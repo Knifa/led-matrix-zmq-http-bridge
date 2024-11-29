@@ -20,7 +20,7 @@ RUN \
   if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
     apk add --no-cache \
       cargo \
-      python3-dev \
+      python3-dev; \
   fi
 
 COPY pyproject.toml uv.lock ./
