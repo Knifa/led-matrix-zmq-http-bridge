@@ -24,6 +24,7 @@ RUN uv sync --frozen --no-dev
 FROM alpine:latest AS run
 
 RUN apk add --no-cache \
+  iproute2 \
   python3
 
 RUN mkdir -p /opt/lmz/
