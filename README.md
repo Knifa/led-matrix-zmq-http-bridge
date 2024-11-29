@@ -4,6 +4,22 @@ A simple HTTP JSON API for sending control messages to [led-matrix-zmq-server](h
 
 Zeroconf is used to publish the API endpoint as a service so it can be discovered by e.g. Home Assistant.
 
+## Docker
+
+[A Docker image is available](https://github.com/knifa/led-matrix-zmq-control-api/pkgs/container/led-matrix-zmq-control-api).
+
+The container must be run with `--network host` for Zeroconf to work.
+
+```shell
+docker run \
+  --rm \
+  --network host \
+  -e LMZ_CONTROL_ENDPOINT=ipc:///run/lmz/control.sock \
+  -e LMZ_ZEROCONF_NAME="My Matrix" \
+  -v /run/lmz:/run/lmz \
+  ghcr.io/knifa/led-matrix-zmq-control-api:latest
+```
+
 ## Usage
 
 See [lmz/settings.py](lmz/settings.py) for possible environment variables.
