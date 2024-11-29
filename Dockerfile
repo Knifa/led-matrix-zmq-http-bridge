@@ -15,10 +15,12 @@ RUN python -m venv .venv && \
 
 ENV PATH="/build/led-matrix-zmq-control-api/.venv/bin:$PATH"
 
-# linux/arm/v7 needs cargo so it can build watchfiles.
+# linux/arm/v7 requires additional build dependencies.
 RUN \
   if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-    apk add --no-cache cargo; \
+    apk add --no-cache \
+      cargo \
+      python3-dev \
   fi
 
 COPY pyproject.toml uv.lock ./
