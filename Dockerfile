@@ -1,4 +1,4 @@
-FROM alpine:latest as build
+FROM alpine:latest AS build
 
 RUN apk add --no-cache \
   py3-pip \
@@ -21,7 +21,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
 
-FROM alpine:latest as run
+FROM alpine:latest AS run
 
 RUN apk add --no-cache \
   python3
