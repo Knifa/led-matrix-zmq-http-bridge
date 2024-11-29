@@ -14,7 +14,7 @@ The container must be run with `--network host` for Zeroconf to work.
 docker run \
   --rm \
   --network host \
-  -e LMZ_CONTROL_ENDPOINT=ipc:///run/lmz/control.sock \
+  -e LMZ_CONTROL_ENDPOINT="ipc:///run/lmz/control.sock" \
   -e LMZ_ZEROCONF_NAME="My Matrix" \
   -v /run/lmz:/run/lmz \
   ghcr.io/knifa/led-matrix-zmq-control-api:latest
