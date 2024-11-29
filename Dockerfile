@@ -19,6 +19,7 @@ ENV PATH="/build/led-matrix-zmq-control-api/.venv/bin:$PATH"
 RUN \
   if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
     apk add --no-cache \
+      build-base \
       cargo \
       python3-dev; \
   fi
