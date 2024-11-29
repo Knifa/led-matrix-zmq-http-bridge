@@ -6,7 +6,7 @@ Zeroconf is used to publish the API endpoint as a service so it can be discovere
 
 ## Docker
 
-[A Docker image is available](https://github.com/knifa/led-matrix-zmq-control-api/pkgs/container/led-matrix-zmq-control-api).
+A [Docker image](https://github.com/knifa/led-matrix-zmq-control-api/pkgs/container/led-matrix-zmq-control-api) is available for `amd64` and `arm64`.
 
 The container must be run with `--network host` for Zeroconf to work.
 
