@@ -26,6 +26,9 @@ class MessageId(enum.IntEnum):
     GET_TEMPERATURE_REPLY = enum.auto()
     SET_TEMPERATURE_REQUEST = enum.auto()
 
+    GET_CONFIGURATION_REQUEST = enum.auto()
+    GET_CONFIGURATION_REPLY = enum.auto()
+
 
 @dataclasses.dataclass
 class Args(abc.ABC):
@@ -40,19 +43,29 @@ class Args(abc.ABC):
 
 
 @dataclasses.dataclass
-class NullArgs(Args):
-    @staticmethod
-    def pack_format() -> str:
-        return "x"
-
-
-@dataclasses.dataclass
 class BrightnessArgs(Args):
     brightness: int
 
     @staticmethod
     def pack_format() -> str:
         return "B"
+
+
+@dataclasses.dataclass
+class ConfigurationArgs(Args):
+    width: int
+    height: int
+
+    @staticmethod
+    def pack_format() -> str:
+        return "HH"
+
+
+@dataclasses.dataclass
+class NullArgs(Args):
+    @staticmethod
+    def pack_format() -> str:
+        return "x"
 
 
 @dataclasses.dataclass
@@ -135,9 +148,20 @@ class SetTemperatureRequest(Message[TemperatureArgs]):
     args_t = TemperatureArgs
 
 
+class GetConfigurationRequest(Message[NullArgs]):
+    id_ = MessageId.GET_CONFIGURATION_REQUEST
+    args_t = NullArgs
+
+
+class GetConfigurationReply(Message[ConfigurationArgs]):
+    id_ = MessageId.GET_CONFIGURATION_REPLY
+    args_t = ConfigurationArgs
+
+
 RequestMessageT = TypeVar(
     "RequestMessageT",
     GetBrightnessRequest,
+    GetConfigurationRequest,
     GetTemperatureRequest,
     SetBrightnessRequest,
     SetTemperatureRequest,
@@ -146,6 +170,7 @@ RequestMessageT = TypeVar(
 ReplyMessageT = TypeVar(
     "ReplyMessageT",
     GetBrightnessReply,
+    GetConfigurationReply,
     GetTemperatureReply,
     NullReply,
 )
@@ -183,6 +208,14 @@ class LmzControl:
             SetBrightnessRequest(BrightnessArgs(brightness)),
             NullReply,
         )
+
+    async def get_configuration(self) -> ConfigurationArgs:
+        reply = await self._send_recv(
+            GetConfigurationRequest(NullArgs()),
+            GetConfigurationReply,
+        )
+
+        return reply.args
 
     async def get_temperature(self) -> int:
         reply = await self._send_recv(

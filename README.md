@@ -53,6 +53,15 @@ curl \
 # {"status": "ok"}
 ```
 
+### GET `/configuration`
+
+Get the configuration of the display, i.e., resolution.
+
+```bash
+curl http://localhost:4200/configuration
+
+# {"width": 64, "height": 32}
+```
 
 ### GET `/temperature`
 ```bash

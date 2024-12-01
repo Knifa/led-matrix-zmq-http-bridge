@@ -53,6 +53,11 @@ class Brightness(BaseModel):
     brightness: int = Field(description="Brightness", ge=0, le=255)
 
 
+class Configuration(BaseModel):
+    width: int = Field(description="Width (pixels)", ge=1, le=65535)
+    height: int = Field(description="Height (pixels)", ge=1, le=65535)
+
+
 class Temperature(BaseModel):
     temperature: int = Field(description="Color temperature (Kelvin)", ge=2000, le=6500)
 
@@ -66,6 +71,12 @@ async def get_brightness() -> Brightness:
 async def set_brightness(request: Brightness) -> JSONResponse:
     await lmz_control.set_brightness(request.brightness)
     return OK_RESPONSE
+
+
+@app.get("/configuration")
+async def get_configuration() -> Configuration:
+    config = await lmz_control.get_configuration()
+    return Configuration(width=config.width, height=config.height)
 
 
 @app.get("/temperature")
