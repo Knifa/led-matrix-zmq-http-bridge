@@ -1,31 +1,31 @@
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Type
+from contextlib import AsyncExitStack, asynccontextmanager
+from typing import AsyncGenerator
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
+from led_matrix_zmq import LmzControlAsync, LmzMessageError
 from pydantic import BaseModel, Field
 
-from .control import LmzControl, MessageError
 from .settings import settings
 from .zeroconf import lmz_zeroconf
 
-lmz_control = LmzControl(settings.control_endpoint)
+lmz_control = LmzControlAsync(settings.control_endpoint)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    if not settings.zeroconf_enabled:
-        yield
-        return
+    async with AsyncExitStack() as stack:
+        await stack.enter_async_context(lmz_control)
 
-    async with (
-        lmz_zeroconf(
-            name=settings.zeroconf_name,
-            address=settings.zeroconf_ip,
-            port=settings.api_port,
-        ),
-        lmz_control,
-    ):
+        if settings.zeroconf_enabled:
+            await stack.enter_async_context(
+                lmz_zeroconf(
+                    name=settings.zeroconf_name,
+                    address=settings.zeroconf_ip,
+                    port=settings.api_port,
+                )
+            )
+
         yield
 
 
@@ -34,9 +34,9 @@ app = FastAPI(lifespan=lifespan)
 OK_RESPONSE = JSONResponse(content={"status": "ok"})
 
 
-@app.exception_handler(MessageError)
+@app.exception_handler(LmzMessageError)
 async def app_message_error_handler(
-    request: Request, exc: MessageError
+    request: Request, exc: LmzMessageError
 ) -> JSONResponse:
     return JSONResponse(
         content={"status": "error", "error": str(exc)},

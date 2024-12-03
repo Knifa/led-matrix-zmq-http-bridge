@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+packages="lmz"
+
+ruff check $packages
+mypy $packages
+pytest

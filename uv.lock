@@ -254,13 +254,25 @@ wheels = [
 ]
 
 [[package]]
+name = "led-matrix-zmq"
+version = "1.0.0rc3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyzmq" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5d/b9/4ad99c657bd55ac1d97e4d482cf7f2f7cf36ba692a49a09bef84e9632cbb/led_matrix_zmq-1.0.0rc3.tar.gz", hash = "sha256:4c5a8a7d5e5e5789c6ec383395dd06f984f52f90d3b85900c0df072115118517", size = 29269 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/41/9b/c6bc1475d70fdeb2cc332e0483e10ea5dee0da69fa9efda147571b2d712a/led_matrix_zmq-1.0.0rc3-py3-none-any.whl", hash = "sha256:ee6e0fd5fd09461b7c2365fd88a5cbf9aea33ab3537bd0221ae1fc74bf40548b", size = 18318 },
+]
+
+[[package]]
 name = "led-matrix-zmq-control-api"
 version = "0.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
+    { name = "led-matrix-zmq" },
     { name = "pydantic-settings" },
-    { name = "pyzmq" },
     { name = "zeroconf" },
 ]
 
@@ -274,8 +286,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.5" },
+    { name = "led-matrix-zmq", specifier = ">=1.0.0rc3" },
     { name = "pydantic-settings", specifier = ">=2.6.1" },
-    { name = "pyzmq", specifier = ">=26.2.0" },
     { name = "zeroconf", specifier = ">=0.136.0" },
 ]
 
