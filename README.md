@@ -1,12 +1,12 @@
-# led-matrix-zmq-control-api
+# led-matrix-zmq-http-bridge
 
-A simple HTTP JSON API for sending control messages to [led-matrix-zmq-server](https://github.com/knifa/led-matrix-zmq-server).
+This is an HTTP bridge for [led-matrix-zmq-server](https://github.com/knifa/led-matrix-zmq-server). You can set brightness, color temperature, etc. via a JSON API.
 
-Zeroconf is used to publish the API endpoint as a service so it can be discovered by e.g. Home Assistant.
+Zeroconf is used to publish the bridge as a service so it can be discovered by e.g. Home Assistant.
 
 ## Docker
 
-A [Docker image](https://github.com/knifa/led-matrix-zmq-control-api/pkgs/container/led-matrix-zmq-control-api) is available for `amd64` and `arm64`.
+A [Docker image](https://github.com/knifa/led-matrix-zmq-http-bridge/pkgs/container/led-matrix-zmq-http-bridge) is available for `amd64` and `arm64`.
 
 The container must be run with `--network host` for Zeroconf to work.
 
@@ -17,7 +17,7 @@ docker run \
   -e "LMZ_CONTROL_ENDPOINT=ipc:///run/lmz/control.sock" \
   -e "LMZ_ZEROCONF_NAME=My Matrix" \
   -v /run/lmz:/run/lmz \
-  ghcr.io/knifa/led-matrix-zmq-control-api:latest
+  ghcr.io/knifa/led-matrix-zmq-http-bridge:latest
 ```
 
 ## Usage
@@ -86,4 +86,4 @@ curl \
 
 ## Zeroconf
 
-The API is published as a Zeroconf service under the type `_lmz-control-api._tcp.local.`.
+The bridge is published as a Zeroconf service under the type `_lmz-http-bridge._tcp.local.`.

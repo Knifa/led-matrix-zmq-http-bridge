@@ -7,7 +7,7 @@ from typing import AsyncGenerator
 
 from zeroconf.asyncio import AsyncServiceInfo, AsyncZeroconf
 
-SERVICE_TYPE = "_lmz-control-api._tcp.local."
+SERVICE_TYPE = "_lmz-http-bridge._tcp.local."
 
 logger = logging.getLogger(__name__)
 

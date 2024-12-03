@@ -266,7 +266,7 @@ wheels = [
 ]
 
 [[package]]
-name = "led-matrix-zmq-control-api"
+name = "led-matrix-zmq-http-bridge"
 version = "0.0.0"
 source = { virtual = "." }
 dependencies = [
