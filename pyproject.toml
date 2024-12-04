@@ -5,7 +5,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.115.5",
-    "led-matrix-zmq>=1.0.0rc3",
+    "led-matrix-zmq>=1.0.0",
     "pydantic-settings>=2.6.1",
     "zeroconf>=0.136.0",
 ]
