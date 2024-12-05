@@ -1,7 +1,8 @@
+import logging
 from contextlib import AsyncExitStack, asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI, Request, status
+from fastapi import APIRouter, FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from led_matrix_zmq import LmzControlAsync, LmzMessageError
 from pydantic import BaseModel, Field
@@ -9,13 +10,18 @@ from pydantic import BaseModel, Field
 from .settings import settings
 from .zeroconf import lmz_zeroconf
 
-lmz_control = LmzControlAsync(settings.control_endpoint)
+logger = logging.getLogger(__name__)
+
+lmz_control: LmzControlAsync | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     async with AsyncExitStack() as stack:
-        await stack.enter_async_context(lmz_control)
+        if settings.control_enabled:
+            global lmz_control
+            lmz_control = LmzControlAsync(settings.control_endpoint)
+            await stack.enter_async_context(lmz_control)
 
         if settings.zeroconf_enabled:
             await stack.enter_async_context(
@@ -30,6 +36,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(lifespan=lifespan)
+control_api = APIRouter()
+frame_api = APIRouter()
 
 OK_RESPONSE = JSONResponse(content={"status": "ok"})
 
@@ -62,29 +70,38 @@ class Temperature(BaseModel):
     temperature: int = Field(description="Color temperature (Kelvin)", ge=2000, le=6500)
 
 
-@app.get("/brightness")
+@control_api.get("/brightness")
 async def get_brightness() -> Brightness:
+    assert lmz_control is not None
     return Brightness(brightness=await lmz_control.get_brightness())
 
 
-@app.post("/brightness")
+@control_api.post("/brightness")
 async def set_brightness(request: Brightness) -> JSONResponse:
+    assert lmz_control is not None
     await lmz_control.set_brightness(request.brightness)
     return OK_RESPONSE
 
 
-@app.get("/configuration")
+@control_api.get("/configuration")
 async def get_configuration() -> Configuration:
+    assert lmz_control is not None
     config = await lmz_control.get_configuration()
     return Configuration(width=config.width, height=config.height)
 
 
-@app.get("/temperature")
+@control_api.get("/temperature")
 async def get_temperature() -> Temperature:
+    assert lmz_control is not None
     return Temperature(temperature=await lmz_control.get_temperature())
 
 
-@app.post("/temperature")
+@control_api.post("/temperature")
 async def set_temperature(request: Temperature) -> JSONResponse:
+    assert lmz_control is not None
     await lmz_control.set_temperature(request.temperature)
     return OK_RESPONSE
+
+
+if settings.control_enabled:
+    app.include_router(control_api)

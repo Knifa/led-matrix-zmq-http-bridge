@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     would set the environment variable `LMZ_API_PORT`.
     """
 
+    """Enable/disable the control API endpoints."""
+    control_enabled: bool = True
+
     """The endpoint to send control messages to."""
     control_endpoint: str = "ipc:///run/lmz-control.sock"
 
