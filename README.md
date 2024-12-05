@@ -17,6 +17,7 @@ docker run \
   --rm \
   --network host \
   -e "LMZ_CONTROL_ENDPOINT=ipc:///run/lmz/control.sock" \
+  -e "LMZ_FRAME_ENDPOINT=ipc:///run/lmz/frame.sock" \
   -e "LMZ_ZEROCONF_NAME=My Matrix" \
   -v /run/lmz:/run/lmz \
   ghcr.io/knifa/led-matrix-zmq-http-bridge:latest
