@@ -1,6 +1,8 @@
 # led-matrix-zmq-http-bridge
 
-This is an HTTP bridge for [led-matrix-zmq-server](https://github.com/knifa/led-matrix-zmq-server). You can set brightness, color temperature, etc. via a JSON API.
+This is an HTTP bridge for [led-matrix-zmq-server](https://github.com/knifa/led-matrix-zmq-server).
+
+You can set brightness, color temperature, and get the configuration via a JSON API. You can also send frames via form data.
 
 Zeroconf is used to publish the bridge as a service so it can be discovered by e.g. Home Assistant.
 
@@ -29,7 +31,9 @@ uv sync
 uv run python -m lmz
 ```
 
-### GET `/brightness`
+### Control API
+
+#### GET `/brightness`
 
 Get the current brightness of the display (0-100%).
 
@@ -39,7 +43,7 @@ curl http://localhost:4200/brightness
 # {"brightness": 50}
 ```
 
-### POST `/brightness`
+#### POST `/brightness`
 
 Set the brightness of the display (0-100%)
 
@@ -53,7 +57,7 @@ curl \
 # {"status": "ok"}
 ```
 
-### GET `/configuration`
+#### GET `/configuration`
 
 Get the configuration of the display, i.e., resolution.
 
@@ -63,14 +67,14 @@ curl http://localhost:4200/configuration
 # {"width": 64, "height": 32}
 ```
 
-### GET `/temperature`
+#### GET `/temperature`
 ```bash
 curl http://localhost:4200/temperature
 
 # {"temperature": 2500}
 ```
 
-###  POST `/temperature`
+####  POST `/temperature`
 
 Set the color temperature of the display (2000-6500K).
 
@@ -80,6 +84,20 @@ curl \
     -H "Content-Type: application/json" \
     -d '{"temperature": 2500}' \
     http://localhost:4200/temperature
+
+# {"status": "ok"}
+```
+
+### Frame API
+
+#### POST `/frame`
+
+Send a frame to the display. No error response is sent if the frame is invalid (e.g., wrong size).
+
+```bash
+curl \
+    -F frame="@frame.raw" \
+    http://localhost:4200/frame
 
 # {"status": "ok"}
 ```

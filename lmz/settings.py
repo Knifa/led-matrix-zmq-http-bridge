@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     """The endpoint to send control messages to."""
     control_endpoint: str = "ipc:///run/lmz-control.sock"
 
+    """Enable/disable the frame API endpoints."""
+    frame_enabled: bool = True
+
+    """The endpoint to send frame data to."""
+    frame_endpoint: str = "ipc:///run/lmz-frame.sock"
+
     """The host to bind the API to."""
     api_host: str = "0.0.0.0"
 

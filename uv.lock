@@ -273,6 +273,7 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "led-matrix-zmq" },
     { name = "pydantic-settings" },
+    { name = "python-multipart" },
     { name = "zeroconf" },
 ]
 
@@ -288,6 +289,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.5" },
     { name = "led-matrix-zmq", specifier = ">=1.0.0" },
     { name = "pydantic-settings", specifier = ">=2.6.1" },
+    { name = "python-multipart", specifier = ">=0.0.17" },
     { name = "zeroconf", specifier = ">=0.136.0" },
 ]
 

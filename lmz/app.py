@@ -1,10 +1,10 @@
 import logging
 from contextlib import AsyncExitStack, asynccontextmanager
-from typing import AsyncGenerator
+from typing import Annotated, AsyncGenerator
 
-from fastapi import APIRouter, FastAPI, Request, status
+from fastapi import APIRouter, FastAPI, File, Request, status
 from fastapi.responses import JSONResponse
-from led_matrix_zmq import LmzControlAsync, LmzMessageError
+from led_matrix_zmq import LmzControlAsync, LmzFrameAsync, LmzMessageError
 from pydantic import BaseModel, Field
 
 from .settings import settings
@@ -13,6 +13,7 @@ from .zeroconf import lmz_zeroconf
 logger = logging.getLogger(__name__)
 
 lmz_control: LmzControlAsync | None = None
+lmz_frame: LmzFrameAsync | None = None
 
 
 @asynccontextmanager
@@ -22,6 +23,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             global lmz_control
             lmz_control = LmzControlAsync(settings.control_endpoint)
             await stack.enter_async_context(lmz_control)
+
+        if settings.frame_enabled:
+            global lmz_frame
+            lmz_frame = LmzFrameAsync(settings.frame_endpoint)
+            await stack.enter_async_context(lmz_frame)
 
         if settings.zeroconf_enabled:
             await stack.enter_async_context(
@@ -103,5 +109,15 @@ async def set_temperature(request: Temperature) -> JSONResponse:
     return OK_RESPONSE
 
 
+@frame_api.post("/frame")
+async def send_frame(frame: Annotated[bytes, File()]) -> JSONResponse:
+    assert lmz_frame is not None
+    await lmz_frame.send(frame)
+    return OK_RESPONSE
+
+
 if settings.control_enabled:
     app.include_router(control_api)
+
+if settings.frame_enabled:
+    app.include_router(frame_api)
