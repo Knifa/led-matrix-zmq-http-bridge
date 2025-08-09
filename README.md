@@ -46,13 +46,13 @@ curl http://localhost:4200/brightness
 
 #### POST `/brightness`
 
-Set the brightness of the display (0-100%)
+Set the brightness of the display (0-255) with transition (0-65535 ms).
 
 ```bash
 curl \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"brightness": 50}' \
+    -d '{"brightness": 50, "transition": 100}' \
     http://localhost:4200/brightness
 
 # {"status": "ok"}
@@ -77,13 +77,13 @@ curl http://localhost:4200/temperature
 
 ####  POST `/temperature`
 
-Set the color temperature of the display (2000-6500K).
+Set the color temperature of the display (2000-6500K) with transition (0-65535 ms).
 
 ```bash
 curl \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"temperature": 2500}' \
+    -d '{"temperature": 2500, "transition": 100}' \
     http://localhost:4200/temperature
 
 # {"status": "ok"}

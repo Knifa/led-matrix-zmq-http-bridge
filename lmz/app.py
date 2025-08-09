@@ -65,6 +65,9 @@ async def healthcheck() -> JSONResponse:
 
 class Brightness(BaseModel):
     brightness: int = Field(description="Brightness", ge=0, le=255)
+    transition: int = Field(
+        description="Transition (milliseconds)", ge=0, le=65535, default=0
+    )
 
 
 class Configuration(BaseModel):
@@ -74,6 +77,9 @@ class Configuration(BaseModel):
 
 class Temperature(BaseModel):
     temperature: int = Field(description="Color temperature (Kelvin)", ge=2000, le=6500)
+    transition: int = Field(
+        description="Transition (milliseconds)", ge=0, le=65535, default=0
+    )
 
 
 @control_api.get("/brightness")
@@ -85,7 +91,7 @@ async def get_brightness() -> Brightness:
 @control_api.post("/brightness")
 async def set_brightness(request: Brightness) -> JSONResponse:
     assert lmz_control is not None
-    await lmz_control.set_brightness(request.brightness)
+    await lmz_control.set_brightness(request.brightness, request.transition)
     return OK_RESPONSE
 
 
@@ -105,7 +111,7 @@ async def get_temperature() -> Temperature:
 @control_api.post("/temperature")
 async def set_temperature(request: Temperature) -> JSONResponse:
     assert lmz_control is not None
-    await lmz_control.set_temperature(request.temperature)
+    await lmz_control.set_temperature(request.temperature, request.transition)
     return OK_RESPONSE
 
 
