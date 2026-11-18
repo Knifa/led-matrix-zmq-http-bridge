@@ -1,4 +1,4 @@
-FROM alpine:latest AS build
+FROM alpine:3.22 AS build
 
 RUN apk add --no-cache \
   py3-pip \
@@ -21,7 +21,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
 
-FROM alpine:latest AS run
+FROM alpine:3.22 AS run
 
 RUN apk add --no-cache \
   iproute2 \
