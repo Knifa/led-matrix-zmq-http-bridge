@@ -1,9 +1,9 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.12"
 resolution-markers = [
-    "python_full_version < '3.13'",
     "python_full_version >= '3.13'",
+    "python_full_version < '3.13'",
 ]
 
 [[package]]
@@ -256,14 +256,14 @@ wheels = [
 
 [[package]]
 name = "led-matrix-zmq"
-version = "1.1.0"
+version = "1.1.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pyzmq" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d4/28/3c66c3f26447ff1752518b582765a008984e23fbdb7e1a019664a6d3399a/led_matrix_zmq-1.1.0.tar.gz", hash = "sha256:9c0d8ac1f1c82a09bc827007f43150d9f4412a4f0e25657a40310d235868c5e5", size = 30788, upload-time = "2025-08-09T02:48:46.946Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bc/0d/f076c184d48a7fb2f4efb0a93883523bf99552ee8cc5ed31dbdba3ca9574/led_matrix_zmq-1.1.1.tar.gz", hash = "sha256:c471f1303689057da3aca16af9c4b670fa0f6a29d9cc1c564917ca7e13d989f6", size = 31111, upload-time = "2026-11-18T14:43:01.012Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/64/45/c771e16e98c5ef401616766217847944b7ad129e3ad85ff4b39994f0c8c5/led_matrix_zmq-1.1.0-py3-none-any.whl", hash = "sha256:785efe3255f16a7ec55729d2fb995bf03ddd88de24afe9832c0d2ffdf7d4539e", size = 18852, upload-time = "2025-08-09T02:48:45.844Z" },
+    { url = "https://files.pythonhosted.org/packages/6d/95/81e820c4a733efc670887d7670ab5be4c5d3994ec0236c50952e5088bb32/led_matrix_zmq-1.1.1-py3-none-any.whl", hash = "sha256:13a0f36ae415a024e181a201845ac5412f1fe7062d779b4e21376d0f2ac32cb8", size = 18923, upload-time = "2026-11-18T14:42:59.593Z" },
 ]
 
 [[package]]
@@ -288,7 +288,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.5" },
-    { name = "led-matrix-zmq", specifier = ">=1.1.0" },
+    { name = "led-matrix-zmq", specifier = ">=1.1.1" },
     { name = "pydantic-settings", specifier = ">=2.6.1" },
     { name = "python-multipart", specifier = ">=0.0.17" },
     { name = "zeroconf", specifier = ">=0.136.0" },
